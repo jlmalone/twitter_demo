@@ -45,44 +45,7 @@ public class LoginFragment extends Fragment {
         return rootView;
     }
 
-//
-//
-//    private void getTwitterWithSessionAndQuery()
-//    {
-//
-//        Log.v("TWITTER", "Twitter.getSessionManager().getActiveSession()" + Twitter.getSessionManager().getActiveSession().toString());
-//
-//        mTwitterApiClient = new TwitterApiClient(Twitter.getSessionManager().getActiveSession());
-//
-//        StatusesService ss = mTwitterApiClient.getStatusesService();
-//
-//        Log.v("TWITTER","get status service "+ss.toString());
-//
-//
-//        ss.userTimeline(null, "shazamfeed", 200, null, null, null, null, null, null, new Callback<List<Tweet>>() {
-//            @Override
-//            public void success(Result<List<Tweet>> listResult) {
-//
-//                Log.v("TWITTER", " group returned ");
-//                if (listResult != null && listResult.data != null) {
-//                    for (Tweet t : listResult.data) {
-//                        Log.v("TWITTER", "List " + t.text.toString() + " " + t.createdAt + " " + t.user.screenName);
-//                    }
-//                }
-//                mTwitterLoginButton.setVisibility(View.GONE);
-//            }
-//
-//            @Override
-//            public void failure(TwitterException e) {
-//                Log.v("TWITTER", "user timeline failure " + e.getLocalizedMessage());
-//
-//
-//            }
-//        });
-//
-//        Log.v("TWITTER","user timeline request");
-//
-//    }
+
 
     @Override
     public void onViewCreated(View v, Bundle b)
@@ -102,6 +65,7 @@ public class LoginFragment extends Fragment {
 
             }
             callback.loginSuccess();
+            return;
 
 //            getTwitterWithSessionAndQuery();
         }
@@ -126,11 +90,14 @@ public class LoginFragment extends Fragment {
             }
 
             @Override
-            public void failure(TwitterException exception) {
+            public void failure(TwitterException exception)
+            {
                 Log.v("TWITTER", "Twitter Exception " + exception.getLocalizedMessage());
                 // Do something on failure
             }
         });
+
+        mTwitterLoginButton.performClick();
     }
 
     @Override

@@ -1,6 +1,7 @@
 package com.procurify.procurifytwitterdemo;
 
 import android.content.Context;
+import android.content.DialogInterface;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -30,13 +31,16 @@ public class TweetAdapter extends RecyclerView.Adapter<TweetAdapter.ViewHolder> 
     public static class ViewHolder extends RecyclerView.ViewHolder {
         // each data item is just a string in this case
 //        public TextView mTextView;
-        public TextView tweetText;
-        public ImageView imageView;
-            public FrameLayout container;
+        public TextView mTweetText;
+        public TextView mUsername;
+        public ImageView mImageView;
+        public TextView mDate;
+        public FrameLayout mContainer;
+        public View.OnClickListener mClickListener;
 
         public ViewHolder(FrameLayout ll) {
             super(ll);
-            container = ll;
+            mContainer = ll;
 //            mCompactTweetView =
 //            tweetText = v;
         }
@@ -73,9 +77,17 @@ public class TweetAdapter extends RecyclerView.Adapter<TweetAdapter.ViewHolder> 
         // set the view's size, margins, paddings and layout parameters
 
         ViewHolder vh = new ViewHolder(v);
-        vh.tweetText =(TextView) v.findViewById(R.id.tweet);
-        vh.imageView = (ImageView)v.findViewById(R.id.thumbnail);
-//        vh.container = (FrameLayout)v.findViewById(R.id.item_layout_container);
+        vh.mUsername = (TextView) v.findViewById(R.id.username);
+        vh.mDate = (TextView) v.findViewById(R.id.date);
+        vh.mTweetText =(TextView) v.findViewById(R.id.tweet);
+        vh.mImageView = (ImageView)v.findViewById(R.id.thumbnail);
+        vh.mContainer = (FrameLayout)v.findViewById(R.id.container);
+        vh.mClickListener = new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+            }
+        };
         return vh;
     }
 
@@ -84,34 +96,19 @@ public class TweetAdapter extends RecyclerView.Adapter<TweetAdapter.ViewHolder> 
     public void onBindViewHolder(ViewHolder holder, int position) {
         // - get element from your dataset at this position
         // - replace the contents of the view with that element
-//        holder.mTextView.setText(mDataset[position]);
 
-        holder.tweetText.setText(mDataset.get(position).text);//.setTweet(mDataset.get(position));
-//        holder.imageView.
-
-        Picasso.with(holder.imageView.getContext())
-                .load(mDataset.get(position).user.profileImageUrl)
-                .into(holder.imageView);
-
-        // Here you apply the animation when the view is bound
-        setAnimation(holder.container, position);
+        holder.mTweetText.setText(mDataset.get(position).text);//.setTweet(mDataset.get(position));
+        holder.mUsername.setText(mDataset.get(position).user.screenName);
+        holder.mDate.setText(mDataset.get(position).createdAt.toString());
+        Picasso.with(holder.mImageView.getContext())
+                .load(mDataset.get(position).user.profileImageUrl.replace("normal", "bigger"))
+                .placeholder(R.drawable.twitter_default_user)
+                .into(holder.mImageView);
     }
 
     private int lastPosition = -1;
     private Context context;
-    /**
-     * Here is the key method to apply the animation
-     */
-    private void setAnimation(View viewToAnimate, int position)
-    {
-        // If the bound view wasn't previously displayed on screen, it's animated
-        if (position > lastPosition)
-        {
-            Animation animation = AnimationUtils.loadAnimation(context, R.anim.slide_in_right);
-            viewToAnimate.startAnimation(animation);
-            lastPosition = position;
-        }
-    }
+
 
     // Return the size of your dataset (invoked by the layout manager)
     @Override
