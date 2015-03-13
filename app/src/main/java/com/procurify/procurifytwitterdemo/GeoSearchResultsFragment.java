@@ -87,15 +87,21 @@ public class GeoSearchResultsFragment extends Fragment
 
         mRecyclerView.setAdapter(mAdapter);
 
-
-
         mRecyclerView.addOnItemTouchListener(
                 new RecyclerItemClickListener(getActivity(), new RecyclerItemClickListener.OnItemClickListener()
                 {
                     @Override public void onItemClick(View view, final int position)
                     {
-                        final Tweet t = lcs.get(position);
-                        mGeoSearchCallback.localTweetSelected(t.user.screenName, t.user.name, t.user.profileImageUrl, t.user.id);
+                        new Handler().postDelayed(new Runnable()
+                        {
+                            @Override
+                            public void run()
+                            {
+                                final Tweet t = lcs.get(position);
+                                mGeoSearchCallback.localTweetSelected(t.user.screenName, t.user.name, t.user.profileImageUrl, t.user.id);
+                            }
+                        },500L);
+
                     }
                 })
         );

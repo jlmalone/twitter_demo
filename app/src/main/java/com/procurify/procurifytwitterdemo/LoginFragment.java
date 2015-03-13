@@ -84,8 +84,10 @@ public class LoginFragment extends Fragment {
                 Log.v("TWITTER", " login success " + result.toString());
 
 //                getTwitterWithSessionAndQuery();
-
-                callback.loginSuccess();
+                if(callback!=null)
+                {
+                    callback.loginSuccess();
+                }
 
             }
 
