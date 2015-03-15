@@ -1,4 +1,4 @@
-package com.procurify.procurifytwitterdemo;
+package com.procurify.procurifytwitterdemo.fragment;
 
 import android.os.Bundle;
 import android.os.Handler;
@@ -13,6 +13,11 @@ import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonParser;
+import com.procurify.procurifytwitterdemo.GeoTwitterApiService;
+import com.procurify.procurifytwitterdemo.R;
+import com.procurify.procurifytwitterdemo.RecyclerItemClickListener;
+import com.procurify.procurifytwitterdemo.adapter.TweetAdapter;
+import com.procurify.procurifytwitterdemo.model.GeoSortableTweet;
 import com.twitter.sdk.android.Twitter;
 import com.twitter.sdk.android.core.Callback;
 import com.twitter.sdk.android.core.Result;
@@ -25,6 +30,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
+import java.util.Collections;
 
 import retrofit.client.Response;
 
@@ -39,12 +45,18 @@ public class GeoSearchResultsFragment extends Fragment
         public static final String LONGITUDE = "LONGITUDE";
         public static final String RADIUS = "RADIUS";
     }
+
+    private static final long CLICK_DELAY_MILLIS = 500L;
+
     private RecyclerView mRecyclerView;
     private TweetAdapter mAdapter;
     private RecyclerView.LayoutManager mLayoutManager;
     private GeoTwitterApiService mTwitterApiClient;
+    private double mCurrentLat;
+    private double mCurrentLon;
+    private ArrayList<GeoSortableTweet> lcs = new ArrayList<>();
 
-    interface GeoSearchCallback
+    public interface GeoSearchCallback
     {
         void localTweetSelected(String username, String fullname, String thumbnail,  long userId);
     }
@@ -72,11 +84,6 @@ public class GeoSearchResultsFragment extends Fragment
         super.onViewCreated(v, b);
         mRecyclerView = (RecyclerView) v.findViewById(R.id.recycler_view);
 
-        // use this setting to improve performance if you know that changes
-        // in content do not change the layout size of the RecyclerView
-//        mRecyclerView.setHasFixedSize(true);
-//        mRecyclerView.addItemDecoration(new DividerItemDecoration(getActivity(), DividerItemDecoration.VERTICAL_LIST));
-
         // use a linear layout manager
         mLayoutManager = new LinearLayoutManager(getActivity());
         mRecyclerView.setLayoutManager(mLayoutManager);
@@ -90,7 +97,8 @@ public class GeoSearchResultsFragment extends Fragment
         mRecyclerView.addOnItemTouchListener(
                 new RecyclerItemClickListener(getActivity(), new RecyclerItemClickListener.OnItemClickListener()
                 {
-                    @Override public void onItemClick(View view, final int position)
+                    @Override
+                    public void onItemClick(View view, final int position)
                     {
                         new Handler().postDelayed(new Runnable()
                         {
@@ -100,42 +108,45 @@ public class GeoSearchResultsFragment extends Fragment
                                 final Tweet t = lcs.get(position);
                                 mGeoSearchCallback.localTweetSelected(t.user.screenName, t.user.name, t.user.profileImageUrl, t.user.id);
                             }
-                        },500L);
+                        }, CLICK_DELAY_MILLIS);
 
                     }
                 })
         );
 
-        getTwitterWithSessionAndQuery((float)getArguments().getDouble(BundleKeys.LATITUDE), (float)getArguments().getDouble(BundleKeys.LONGITUDE), (float)getArguments().getInt(BundleKeys.RADIUS));
+        mCurrentLat = getArguments().getDouble(BundleKeys.LATITUDE);
+        mCurrentLon = getArguments().getDouble(BundleKeys.LONGITUDE);
+
+        getTwitterWithSessionAndQuery(getArguments().getDouble(BundleKeys.LATITUDE),getArguments().getDouble(BundleKeys.LONGITUDE), getArguments().getInt(BundleKeys.RADIUS));
     }
 
-    ArrayList<Tweet> lcs = new ArrayList<Tweet>();
-
-    private void getTwitterWithSessionAndQuery(float lat, float lon, float kmDistance)
+    private void getTwitterWithSessionAndQuery(double lat, double lon, double kmDistance)
     {
-        Log.v("TWITTER", "Twitter.getSessionManager().getActiveSession()" + Twitter.getSessionManager().getActiveSession().toString());
-
         mTwitterApiClient = new GeoTwitterApiService(Twitter.getSessionManager().getActiveSession());
 
-        GeoTweetService geoTweetService = mTwitterApiClient.getGeoTweetService();
+        GeoTwitterApiService.GeoTweetService geoTweetService = mTwitterApiClient.getGeoTweetService();
 
-        geoTweetService.geoTweets(lat + "," + lon + "," + kmDistance + "km", 100, new Callback<Response>() {
+        geoTweetService.geoTweets(String.format(getResources().getString(R.string.twitter_geo_submit),lat,lon,(int)kmDistance), 100, new Callback<Response>()
+        {
             @Override
-            public void success(Result<Response> listResult) {
+            public void success(Result<Response> listResult)
+            {
                 BufferedReader reader = null;
                 final StringBuilder sb = new StringBuilder();
-                try {
-                    try {
+                try
+                {
+                    try
+                    {
                         reader = new BufferedReader(
                                 new InputStreamReader(listResult.data.getBody().in()));
                         String line;
 
-                        while ((line = reader.readLine()) != null) {
+                        while ((line = reader.readLine()) != null)
+                        {
                             sb.append(line);
                         }
 
                         final String tweetJson = sb.toString();
-                        System.out.println(tweetJson);
 
                         Gson gson = new Gson();
                         JsonParser parser = new JsonParser();
@@ -144,31 +155,41 @@ public class GeoSearchResultsFragment extends Fragment
 
                         lcs.clear();
 
-                        for (JsonElement obj : jArray) {
-                            Tweet cse = gson.fromJson(obj, Tweet.class);
-                            Log.v("TWITTER", "geo List "+cse.user.profileImageUrl+" " +cse.user.profileImageUrlHttps+" "+cse.coordinates.getLatitude()+" "+cse.coordinates.getLongitude() + cse.text.toString() + " " + cse.createdAt + " " + cse.user.screenName);
-
+                        for (JsonElement obj : jArray)
+                        {
+                            GeoSortableTweet cse = gson.fromJson(obj, GeoSortableTweet.class);
+                            cse.setCurrentLocation(mCurrentLat, mCurrentLon );
                             lcs.add(cse);
+                        }
+
+                        Collections.sort(lcs);
+
+                        //TODO REMOVE LOGGING
+                        for(GeoSortableTweet t:lcs)
+                        {
+                            Log.v("TWITTER", "Distance from User: "+GeoSortableTweet.calculateTweetDistanceRadians(t));
                         }
 
                         mAdapter.setData(lcs);
                         mAdapter.notifyDataSetChanged();
-                    } finally {
+                    }
+                    finally
+                    {
                         reader.close();
                     }
-                } catch (IOException e) {
+                }
+                catch (IOException e)
+                {
                     Log.d("TWITTER", "failed to open and read stream");
                 }
             }
 
             @Override
-            public void failure(TwitterException e) {
+            public void failure(TwitterException e)
+            {
                 Log.v("TWITTER", "geoTweets twitter geo search failure " + e.getLocalizedMessage());
                 //TODO NO DATA STATE
-
             }
         });
     }
-
-
 }

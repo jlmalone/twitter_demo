@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-
     <string name="app_name">Procurify Twitter Demo</string>
     <string name="hello_world">Hello world!</string>
     <string name="action_settings">Settings</string>
@@ -9,5 +8,8 @@
     <string name="lon">Lon:</string>
     <string name="radius">Radius:</string>
     <string name="km">km</string>
-
+    <string name="tweet_and_fav" formatted="false" >%s Retweets. %s Favourites</string>
+    <string name="retweets" formatted="false">%d Retweets</string>
+    <string name="favourites" formatted="false">%d Favourites</string>
+    <string name="twitter_geo_submit"  formatted="false">%.6f,%.6f,%dkm</string>
 </resources>

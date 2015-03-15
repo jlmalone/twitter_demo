@@ -1,4 +1,4 @@
-package com.procurify.procurifytwitterdemo;
+package com.procurify.procurifytwitterdemo.fragment;
 
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -12,6 +12,10 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.procurify.procurifytwitterdemo.GeoTwitterApiService;
+import com.procurify.procurifytwitterdemo.R;
+import com.procurify.procurifytwitterdemo.RecyclerItemClickListener;
+import com.procurify.procurifytwitterdemo.adapter.TweetAdapter;
 import com.squareup.picasso.Picasso;
 import com.twitter.sdk.android.Twitter;
 import com.twitter.sdk.android.core.Callback;
@@ -27,7 +31,7 @@ import java.util.List;
 /**
  * Created by Joseph on 11.03.15.
  */
-public class TwitterProfile extends Fragment
+public class TwitterProfileFragment extends Fragment
 {
     public class BundleKey
     {
@@ -50,7 +54,6 @@ public class TwitterProfile extends Fragment
                              Bundle savedInstanceState)
     {
         View rootView = inflater.inflate(R.layout.twitter_profile, container, false);
-      Log.v("TWITTER", "has full name " + getArguments().containsKey(BundleKey.FULL_NAME));
         return rootView;
     }
 
@@ -103,9 +106,6 @@ public class TwitterProfile extends Fragment
         mTwitterApiClient = new GeoTwitterApiService(Twitter.getSessionManager().getActiveSession());
 
         StatusesService ss = mTwitterApiClient.getStatusesService();
-
-        Log.v("TWITTER","get status service "+ss.toString());
-
         ss.userTimeline(userId, null, 20, null, null, null, null, null, null, new Callback<List<Tweet>>()
         {
             @Override

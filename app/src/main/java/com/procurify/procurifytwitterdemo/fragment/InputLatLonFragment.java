@@ -1,6 +1,9 @@
-package com.procurify.procurifytwitterdemo;
+package com.procurify.procurifytwitterdemo.fragment;
 
 import android.content.Context;
+import android.content.res.Resources;
+import android.graphics.Color;
+import android.location.Criteria;
 import android.location.Geocoder;
 import android.location.Location;
 import android.location.LocationListener;
@@ -13,7 +16,10 @@ import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.TextView;
 import android.widget.Toast;
+
+import com.procurify.procurifytwitterdemo.R;
 
 import java.util.Locale;
 
@@ -22,7 +28,7 @@ import java.util.Locale;
  */
 public class InputLatLonFragment extends Fragment
 {
-    interface CoordinateSelectionCallback
+    public interface CoordinateSelectionCallback
     {
        void selectCoordinates(double lat, double lon, int radius);
     }
@@ -67,10 +73,11 @@ public class InputLatLonFragment extends Fragment
                 try
                 {
                     InputMethodManager imm = (InputMethodManager)getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
-                    imm.hideSoftInputFromWindow(getActivity().getCurrentFocus().getWindowToken(), 0);
+                    imm.hideSoftInputFromWindow(v.getWindowToken(), 0);
                     mCoordinateSelectionCallback.selectCoordinates(Double.parseDouble(mLat.getText().toString()), Double.parseDouble(mLon.getText().toString()), Integer.parseInt(mRadius.getText().toString()));
 
-                }catch (NumberFormatException nfe)
+                }
+                catch (NumberFormatException nfe)
                 {
                     Toast.makeText(getActivity(), "Invalid Numbers", Toast.LENGTH_SHORT).show();
                 }
@@ -78,20 +85,27 @@ public class InputLatLonFragment extends Fragment
         });
 
 
-        LocationManager locationManager = (LocationManager)
+        locationManager = (LocationManager)
                 getActivity().getSystemService(Context.LOCATION_SERVICE);
 
-//        LocationListener locationListener = new MyLocationListener();
-//        locationManager.requestLocationUpdates(
-//                LocationManager.GPS_PROVIDER, 5000, 10, locationListener);
-        Location ll = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
-        if(ll!=null)
+        locationListener = new MyLocationListener();
+        locationManager.requestLocationUpdates(
+                LocationManager.GPS_PROVIDER, 5000, 10, locationListener);
+        Criteria criteria = new Criteria();
+        criteria.setAccuracy(Criteria.ACCURACY_FINE);
+        criteria.setPowerRequirement(Criteria.ACCURACY_HIGH);
+        Location ll = locationManager.getLastKnownLocation(locationManager.getBestProvider(criteria,true));
+        if(ll !=null)
         {
             mLat.setText((ll.getLatitude() + "").substring(0,9));
             mLon.setText((ll.getLongitude() + "").substring(0,9));
             mRadius.setText(""+DEFAULT_RADIUS_KM);
+
         }
     }
+
+    LocationManager locationManager;
+    LocationListener locationListener;
 
     //onCreate and onCreateView to hook up components
 
@@ -103,11 +117,19 @@ public class InputLatLonFragment extends Fragment
     private class MyLocationListener implements LocationListener {
 
         @Override
-        public void onLocationChanged(Location loc) {
+        public void onLocationChanged(Location ll)
+        {
 
-            String longitude = "Longitude: " + loc.getLongitude();
-            String latitude = "Latitude: " + loc.getLatitude();
+            if(ll !=null && mLat.getText().toString().equals("")
+                    && mLon.getText().toString().equals("")
+                    && mRadius.getText().toString().equals(""))
+            {
+                mLat.setText((ll.getLatitude() + "").substring(0,9));
+                mLon.setText((ll.getLongitude() + "").substring(0,9));
+                mRadius.setText(""+DEFAULT_RADIUS_KM);
 
+            }
+            locationManager.removeUpdates(locationListener);
         }
 
         @Override

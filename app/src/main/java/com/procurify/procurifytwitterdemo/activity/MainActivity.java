@@ -1,11 +1,15 @@
-package com.procurify.procurifytwitterdemo;
+package com.procurify.procurifytwitterdemo.activity;
 
 import android.content.Intent;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.Fragment;
 import android.os.Bundle;
-import android.util.Log;
 
+import com.procurify.procurifytwitterdemo.fragment.TwitterProfileFragment;
+import com.procurify.procurifytwitterdemo.fragment.GeoSearchResultsFragment;
+import com.procurify.procurifytwitterdemo.R;
+import com.procurify.procurifytwitterdemo.fragment.InputLatLonFragment;
+import com.procurify.procurifytwitterdemo.fragment.LoginFragment;
 import com.twitter.sdk.android.Twitter;
 import com.twitter.sdk.android.core.TwitterAuthConfig;
 
@@ -58,7 +62,7 @@ public class MainActivity extends FragmentActivity implements InputLatLonFragmen
     {
         InputLatLonFragment latLonFragment = new InputLatLonFragment(this);
         getSupportFragmentManager().beginTransaction()
-                .replace(R.id.container,latLonFragment )
+                .replace(R.id.container, latLonFragment)
                 .commit();
     }
 
@@ -83,11 +87,11 @@ public class MainActivity extends FragmentActivity implements InputLatLonFragmen
     public void localTweetSelected(String username, String fullname, String thumbnail, long userId)
     {
         Bundle bundle = new Bundle();
-        bundle.putLong(TwitterProfile.BundleKey.USER_ID, userId);
-        bundle.putString(TwitterProfile.BundleKey.FULL_NAME, fullname);
-        bundle.putString(TwitterProfile.BundleKey.THUMBNAIL, thumbnail);
-        bundle.putString(TwitterProfile.BundleKey.USERNAME, username);
-        TwitterProfile twitterProfileFragment = new TwitterProfile();
+        bundle.putLong(TwitterProfileFragment.BundleKey.USER_ID, userId);
+        bundle.putString(TwitterProfileFragment.BundleKey.FULL_NAME, fullname);
+        bundle.putString(TwitterProfileFragment.BundleKey.THUMBNAIL, thumbnail);
+        bundle.putString(TwitterProfileFragment.BundleKey.USERNAME, username);
+        TwitterProfileFragment twitterProfileFragment = new TwitterProfileFragment();
         twitterProfileFragment.setArguments(bundle);
         getSupportFragmentManager().beginTransaction()
                 .replace(R.id.container, twitterProfileFragment).addToBackStack("twitter")

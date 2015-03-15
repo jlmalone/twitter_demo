@@ -11,7 +11,7 @@ import retrofit.http.Query;
 /**
  * Created by Joseph on 11.03.15.
  */
-class GeoTwitterApiService extends TwitterApiClient {
+public class GeoTwitterApiService extends TwitterApiClient {
     public GeoTwitterApiService(TwitterSession session) {
         super(session);
     }
@@ -22,12 +22,18 @@ class GeoTwitterApiService extends TwitterApiClient {
     public GeoTweetService getGeoTweetService() {
         return getService(GeoTweetService.class);
     }
-}
 
-// example users/geoTweets service endpoint
-interface GeoTweetService {
-    @GET("/1.1/search/tweets.json")
-    void geoTweets(@Query("geocode") String geocode, @Query("count") int count, Callback<Response> cb);
+
+
+
+    // example users/geoTweets service endpoint
+    public interface GeoTweetService
+    {
+        @GET("/1.1/search/tweets.json")
+        void geoTweets(@Query("geocode") String geocode, @Query("count") int count, Callback<Response> cb);
+    }
+
+
 
 
 }
