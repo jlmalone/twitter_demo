@@ -50,8 +50,7 @@ public class TwitterProfileFragment extends Fragment
     private ImageView mImageView;
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState)
+    public View onCreateView(LayoutInflater inflater, ViewGroup container,Bundle savedInstanceState)
     {
         View rootView = inflater.inflate(R.layout.twitter_profile, container, false);
         return rootView;
