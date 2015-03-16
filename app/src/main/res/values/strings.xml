@@ -12,4 +12,7 @@
     <string name="retweets" formatted="false">%d Retweets</string>
     <string name="favourites" formatted="false">%d Favourites</string>
     <string name="twitter_geo_submit"  formatted="false">%.6f,%.6f,%dkm</string>
+    <string name="invalid_latitude">Invalid Latitude</string>
+    <string name="invalid_longitude">Invalid Longitude</string>
+    <string name="invalid_radius">Invalid Radius</string>
 </resources>

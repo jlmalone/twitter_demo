@@ -1,10 +1,7 @@
 package com.procurify.procurifytwitterdemo.fragment;
 
 import android.content.Context;
-import android.content.res.Resources;
-import android.graphics.Color;
 import android.location.Criteria;
-import android.location.Geocoder;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
@@ -16,12 +13,9 @@ import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import com.procurify.procurifytwitterdemo.R;
-
-import java.util.Locale;
 
 /**
  * Created by Joseph on 10.03.15.
@@ -34,18 +28,20 @@ public class InputLatLonFragment extends Fragment
     }
 
     private static final int DEFAULT_RADIUS_KM = 10;
-    // Input fields, lat and lon
+
     private Button mEnter;
     private EditText mLat;
     private EditText mLon;
     private EditText mRadius;
 
+    private LocationManager locationManager;
+    private LocationListener locationListener;
+
     private CoordinateSelectionCallback mCoordinateSelectionCallback;
 
 
-    public InputLatLonFragment(CoordinateSelectionCallback coordinateSelectionCallback)
+    public void setCoordinateSelectionCallback(CoordinateSelectionCallback coordinateSelectionCallback)
     {
-        super();
         mCoordinateSelectionCallback = coordinateSelectionCallback;
     }
 
@@ -70,12 +66,16 @@ public class InputLatLonFragment extends Fragment
             @Override
             public void onClick(View v)
             {
+                if(!validateAllInputs())
+                {
+                    return;
+                }
+
                 try
                 {
                     InputMethodManager imm = (InputMethodManager)getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
                     imm.hideSoftInputFromWindow(v.getWindowToken(), 0);
                     mCoordinateSelectionCallback.selectCoordinates(Double.parseDouble(mLat.getText().toString()), Double.parseDouble(mLon.getText().toString()), Integer.parseInt(mRadius.getText().toString()));
-
                 }
                 catch (NumberFormatException nfe)
                 {
@@ -104,14 +104,55 @@ public class InputLatLonFragment extends Fragment
         }
     }
 
-    LocationManager locationManager;
-    LocationListener locationListener;
+    private static boolean validateInput(String input ,int limit, boolean allowedNonPositive)
+    {
+        double test;
+        if (input != null && input.length() > 0 && limit>0)
+        {
+            try
+            {
+                test = Double.parseDouble(input);
+                if (test > limit )
+                {
+                    return false;
+                }
+                if(allowedNonPositive && test<-limit)
+                {
+                    return false;
+                }
+                else if(!allowedNonPositive && test<=0)
+                {
+                    return false;
+                }
+                return true;
+            }
+            catch (NumberFormatException nfe)
+            {
+                return false;
+            }
+        }
+        return false;
+    }
 
-    //onCreate and onCreateView to hook up components
-
-    //signal activity to trigger
-
-    //TODO Validation -90 +90  -180 180 for lat and lon
+    private boolean validateAllInputs()
+    {
+       if( !validateInput(mLat.getText().toString(),90, true))
+       {
+           Toast.makeText(getActivity(), R.string.invalid_latitude, Toast.LENGTH_SHORT).show();
+           return false;
+       }
+        if( !validateInput(mLon.getText().toString(),180, true))
+        {
+            Toast.makeText(getActivity(), R.string.invalid_longitude, Toast.LENGTH_SHORT).show();
+            return false;
+        }
+        if (!validateInput(mRadius.getText().toString(), 15000, false))
+        {
+            Toast.makeText(getActivity(), R.string.invalid_radius, Toast.LENGTH_SHORT).show();
+            return false;
+        }
+        return true;
+    }
 
     /*---------- Listener class to get coordinates ------------- */
     private class MyLocationListener implements LocationListener {

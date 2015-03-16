@@ -60,7 +60,8 @@ public class MainActivity extends FragmentActivity implements InputLatLonFragmen
     @Override
     public void loginSuccess()
     {
-        InputLatLonFragment latLonFragment = new InputLatLonFragment(this);
+        InputLatLonFragment latLonFragment = new InputLatLonFragment();
+        latLonFragment.setCoordinateSelectionCallback(this);
         getSupportFragmentManager().beginTransaction()
                 .replace(R.id.container, latLonFragment)
                 .commit();
